@@ -2,6 +2,6 @@ import { Pizza } from '../../models'
 
 export type PizzaItemProps = {
   pizza: Pizza
-  removePizza: (pizza: Pizza) => void
+  removePizza: (_id: number) => void
   editPizza: (pizza: Pizza) => void
 }

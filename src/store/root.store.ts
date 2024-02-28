@@ -1,16 +1,21 @@
 import { combineReducers } from 'redux'
 import { configureStore } from '@reduxjs/toolkit'
-import { pizzaReducer } from './reducers'
-import { pizzaAPI } from '../services'
+import { pizzaReducer, userReducer, authReducer } from './reducers'
 
 export const rootReducer = combineReducers({
   pizzaReducer,
-  [pizzaAPI.reducerPath]: pizzaAPI.reducer,
+  userReducer,
+  authReducer,
 })
 
 export const setupStore = () =>
   configureStore({
     reducer: rootReducer,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(pizzaAPI.middleware),
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredPaths: ['pizzaReducer.newPizzaImage'],
+          ignoredActions: ['pizza/setNewPizzaImage'],
+        },
+      }),
   })

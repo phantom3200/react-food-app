@@ -1,5 +1,6 @@
 import { FC, MouseEvent } from 'react'
 import { PizzaItemProps } from './PizzaItem.types'
+import { getImgUrl } from '../../helpers'
 
 const PizzaItem: FC<PizzaItemProps> = ({ pizza, removePizza, editPizza }) => {
   const handleEdit = () => {
@@ -12,7 +13,7 @@ const PizzaItem: FC<PizzaItemProps> = ({ pizza, removePizza, editPizza }) => {
 
   const handleRemove = (event: MouseEvent) => {
     event.stopPropagation()
-    removePizza(pizza)
+    removePizza(pizza._id)
   }
 
   return (
@@ -20,7 +21,11 @@ const PizzaItem: FC<PizzaItemProps> = ({ pizza, removePizza, editPizza }) => {
       <button onClick={handleEdit}>Edit</button>
       <button onClick={handleRemove}>Remove</button>
       <div>{pizza.name}</div>
-      <img style={{ width: '200px' }} src={pizza.imageLink} alt={pizza.name} />
+      <img
+        style={{ width: '200px' }}
+        src={getImgUrl(pizza.fileName)}
+        alt={pizza.name}
+      />
     </li>
   )
 }

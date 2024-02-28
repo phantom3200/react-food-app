@@ -1,19 +1,40 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import './App.css'
 import { Pizza } from './models'
-import { PizzaItem } from './components'
+import { PizzaItem, LoginForm, AddPizzaForm } from './components'
 import { useAppDispatch, useAppSelector } from './hooks'
-import { fetchPizzas, addPizza, removePizza, updatePizza } from './store'
+import {
+  fetchPizzas,
+  fetchUsers,
+  removePizza,
+  updatePizza,
+  checkAuth,
+} from './services'
 import { generateNewId } from './helpers'
 
 function App() {
   const { pizzasList, error, isLoading } = useAppSelector(
     (state) => state.pizzaReducer,
   )
+  const {
+    usersList,
+    error: userError,
+    isLoading: isUserLoading,
+  } = useAppSelector((state) => state.userReducer)
   const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      dispatch(checkAuth())
+    }
+  }, [])
 
   const handleGetPizzas = () => {
     dispatch(fetchPizzas())
+  }
+
+  const handleGetUsers = () => {
+    dispatch(fetchUsers())
   }
 
   const handleAddPizza = () => {
@@ -22,21 +43,21 @@ function App() {
 
     if (title && newID) {
       const data: Pizza = {
-        id: newID,
+        _id: newID,
         name: title,
-        imageLink: '',
+        fileName: '',
       }
 
-      dispatch(addPizza(data))
+      /*dispatch(addPizza(data))
         .unwrap()
-        .then(() => dispatch(fetchPizzas()))
+        .then(() => dispatch(fetchPizzas()))*/
     }
   }
 
-  const handleDeletePizza = (pizza: Pizza) => {
-    dispatch(removePizza(pizza))
-      .unwrap()
-      .then(() => dispatch(fetchPizzas()))
+  const handleDeletePizza = (id: number) => {
+    dispatch(removePizza(id))
+    /*.unwrap()
+      .then(() => dispatch(fetchPizzas()))*/
   }
 
   const handleEditPizza = (pizza: Pizza) => {
@@ -47,10 +68,13 @@ function App() {
 
   return (
     <div className="App">
+      <button onClick={handleGetUsers}>Get Users</button>
       <button onClick={handleGetPizzas}>Get Pizzas</button>
       <button onClick={handleAddPizza}> Add Pizza</button>
+      <LoginForm />
+      <AddPizzaForm />
       {isLoading && <div>Идет загрузка...</div>}
-      {error && <div>Ошибка</div>}
+      {error && <div>{error}</div>}
       <ul>
         {pizzasList &&
           pizzasList.map((pizza) => (
@@ -58,9 +82,15 @@ function App() {
               pizza={pizza}
               removePizza={handleDeletePizza}
               editPizza={handleEditPizza}
-              key={pizza.id}
+              key={pizza._id}
             />
           ))}
+      </ul>
+      {isUserLoading && <div>Идет загрузка...</div>}
+      {userError && <div>{userError}</div>}
+      <ul>
+        {usersList &&
+          usersList.map((user) => <div key={user.id}>{user.email}</div>)}
       </ul>
     </div>
   )

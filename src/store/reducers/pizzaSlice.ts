@@ -1,19 +1,19 @@
 import { Pizza } from '../../models'
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import {
-  isFulfilledAction,
-  isPendingAction,
-  isRejectedAction,
-} from '../../helpers'
+import { createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit'
+import { addPizza, fetchPizzas, removePizza, updatePizza } from '../../services'
 
-interface PizzaState {
+export type PizzaState = {
   pizzasList: Pizza[]
+  newPizzaName: string
+  newPizzaImage: File | null
   isLoading: boolean
   error: string
 }
 
 export const initialPizzasState: PizzaState = {
   pizzasList: [],
+  newPizzaName: '',
+  newPizzaImage: null,
   isLoading: false,
   error: '',
 }
@@ -22,31 +22,49 @@ export const pizzaSlice = createSlice({
   name: 'pizza',
   initialState: initialPizzasState,
   reducers: {
-    /* increment(state, action: PayloadAction<number>) {
-            state.counter += action.payload
-        },
-        decrement(state, action: PayloadAction<number>) {
-            state.counter -= action.payload
-        },*/
+    setNewPizzaName(state, { payload }: PayloadAction<string>) {
+      state.newPizzaName = payload
+    },
+    setNewPizzaImage(state, { payload }: PayloadAction<File>) {
+      state.newPizzaImage = payload
+    },
   },
   extraReducers: (builder) => {
     builder
       .addMatcher(
-        isRejectedAction,
-        (state: PizzaState, action: PayloadAction<string>) => {
+        isAnyOf(
+          fetchPizzas.rejected,
+          addPizza.rejected,
+          removePizza.rejected,
+          updatePizza.rejected,
+        ),
+        (state: PizzaState, action: PayloadAction<any>) => {
           state.isLoading = false
           state.error = action.payload
         },
       )
-      .addMatcher(isPendingAction, (state: PizzaState) => {
-        state.isLoading = true
-      })
       .addMatcher(
-        isFulfilledAction,
+        isAnyOf(
+          fetchPizzas.pending,
+          addPizza.pending,
+          removePizza.pending,
+          updatePizza.pending,
+        ),
+        (state: PizzaState) => {
+          state.isLoading = true
+        },
+      )
+      .addMatcher(
+        isAnyOf(
+          fetchPizzas.fulfilled,
+          addPizza.fulfilled,
+          removePizza.fulfilled,
+          /*updatePizza.fulfilled,*/
+        ),
         (state: PizzaState, action: PayloadAction<Pizza[]>) => {
           state.isLoading = false
           state.error = ''
-          if (action.payload) state.pizzasList = action.payload
+          state.pizzasList = action.payload
         },
       )
   },

@@ -1,6 +1,6 @@
-export interface Pizza {
-  id: number
+export type Pizza = {
+  _id: number
   name: string
   /*components: string[]*/
-  imageLink: string
+  fileName: string
 }
